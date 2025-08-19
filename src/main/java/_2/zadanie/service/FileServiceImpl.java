@@ -69,9 +69,13 @@ public class FileServiceImpl implements FileService {
                 Thread.sleep(15000);
 
                 file.setStatus(1);
+
                 fileRepository.save(file);
+
             } catch (InterruptedException e){
+
                 throw new RuntimeException(e);
+
             }
         });
     }
