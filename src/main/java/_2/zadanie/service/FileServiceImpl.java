@@ -10,7 +10,6 @@ import org.springframework.stereotype.Service;
 import java.io.*;
 import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.CompletableFuture;
 
 
 @RequiredArgsConstructor
@@ -25,14 +24,11 @@ public class FileServiceImpl implements FileService {
         fileData.setFileName(file.getFileName());
         fileData.setFileType(file.getFileType());
         fileData.setSize(file.getSize());
-        fileData.setStatus(0);
+        fileData.setStatus(1);
         fileData.setUserId(userId);
         fileData.setComment(comment);
         fileData.setFile(file.getFile());
-        fileData.setContent(file.getContent());
-        fileRepository.save(fileData);
-
-        scanFile(fileData.getId());
+        fileRepository.save(file);
     }
 
     @Override
@@ -58,22 +54,6 @@ public class FileServiceImpl implements FileService {
 
     public List<String> getListOfNames(){
         return fileRepository.findAll().stream().map(FileData::getFileName).toList();
-    }
-
-    public CompletableFuture<Void> scanFile(Long id){
-        return CompletableFuture.runAsync(() -> {
-            try {
-
-                FileData file = fileRepository.findById(id).orElseThrow(() -> new RuntimeException("Файл не найден"));
-
-                Thread.sleep(15000);
-
-                file.setStatus(1);
-                fileRepository.save(file);
-            } catch (InterruptedException e){
-                throw new RuntimeException(e);
-            }
-        });
     }
 
 }
