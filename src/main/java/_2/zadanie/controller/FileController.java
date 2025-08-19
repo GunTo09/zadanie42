@@ -5,9 +5,13 @@ import _2.zadanie.model.FileData;
 import _2.zadanie.service.FileService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
@@ -49,4 +53,14 @@ public class FileController {
         List<String> listOfNames = fileService.getListOfNames();
         return ResponseEntity.ok(ApiResponse.ok(listOfNames));
     }
+
+    @GetMapping("/download/{id}")
+    public ResponseEntity<byte[]> downloadFile(@PathVariable Long id) throws IOException{
+        FileData fileData = fileService.getFileData(id).get();
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + fileData.getFileName())
+                .contentType(MediaType.parseMediaType(fileData.getFileType()))
+                .body(fileData.getContent());
+    }
+
 }
