@@ -5,7 +5,6 @@ import _2.zadanie.model.FileData;
 import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.CompletableFuture;
 
 public interface FileService {
 
@@ -18,7 +17,5 @@ public interface FileService {
     Optional<FileData> getFileData(Long id);
 
     List<String> getListOfNames();
-
-    CompletableFuture<Void> scanFile(Long id);
 
 }
