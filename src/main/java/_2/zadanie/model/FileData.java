@@ -48,4 +48,6 @@ public class FileData {
     @NotEmpty(message = "Sorry, empty")
     private File file;
 
+    @Lob
+    private byte[] content;
 }
