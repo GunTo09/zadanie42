@@ -1,16 +1,21 @@
 package _2.zadanie.service;
 
 
+import _2.zadanie.dto.FileDto;
 import _2.zadanie.model.FileData;
 import _2.zadanie.repository.FileRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 
 import java.io.*;
+import java.time.LocalDateTime;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
+import java.util.function.Predicate;
 
 
 @RequiredArgsConstructor
@@ -18,6 +23,8 @@ import java.util.concurrent.CompletableFuture;
 public class FileServiceImpl implements FileService {
 
     private final FileRepository fileRepository;
+    @Value("${server.url}")
+    private String serverUrl;
 
     @Override
     public void addFile(FileData file, Long userId, String comment){
@@ -73,7 +80,32 @@ public class FileServiceImpl implements FileService {
             } catch (InterruptedException e){
                 throw new RuntimeException(e);
             }
+
         });
+    }
+
+    public List<FileDto> getFilteredList(String name, LocalDateTime dateFrom, LocalDateTime dateTo, List<String> types){
+        List<FileData> list = fileRepository.findAll();
+
+        return list.stream()
+                .filter(file -> name == null || file.getFileName().equalsIgnoreCase(name))
+                .filter(file -> dateFrom == null || !file.getUploadedTime().isBefore(dateFrom))
+                .filter(file -> dateTo == null || !file.getChangedTime().isAfter(dateTo))
+                .filter(file -> types == null || types.isEmpty() || types.contains(file.getFileType()))
+                .map(file -> {
+                    FileDto dto = new FileDto();
+                    dto.setId(file.getId());
+                    dto.setFileName(file.getFileName());
+                    dto.setFileType(file.getFileType());
+                    dto.setSize(file.getSize());
+                    dto.setStatus(file.getStatus());
+                    dto.setUserId(file.getUserId());
+                    dto.setUploadedTime(file.getUploadedTime());
+                    dto.setChangedTime(file.getChangedTime());
+                    dto.setComment(file.getComment());
+                    dto.setDownloadUrl(serverUrl + "/files/download/" + file.getId());
+                    return dto;
+                }).toList();
     }
 
 }

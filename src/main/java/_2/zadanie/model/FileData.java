@@ -7,6 +7,7 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.io.File;
+import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -29,11 +30,11 @@ public class FileData {
 
     @CreationTimestamp
     @Temporal(TemporalType.TIMESTAMP)
-    private Date uploadedTime;
+    private LocalDateTime uploadedTime;
 
     @UpdateTimestamp
     @Temporal(TemporalType.TIMESTAMP)
-    private Date changedTime;
+    private LocalDateTime changedTime;
 
     @NotEmpty(message = "Sorry, empty")
     private Long size;

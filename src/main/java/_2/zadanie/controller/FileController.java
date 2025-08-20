@@ -1,10 +1,13 @@
 package _2.zadanie.controller;
 
 import _2.zadanie.dto.ApiResponse;
+import _2.zadanie.dto.FileDto;
 import _2.zadanie.model.FileData;
 import _2.zadanie.service.FileService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -13,6 +16,7 @@ import org.springframework.web.bind.annotation.*;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -22,6 +26,8 @@ import java.util.Optional;
 public class FileController {
 
     private final FileService fileService;
+    @Value("${server.url}")
+    private String serverUrl;
 
     @PostMapping
     ResponseEntity<ApiResponse> addFile(@RequestParam @Valid FileData file, @RequestParam Long userId, @RequestParam String comment){
@@ -61,6 +67,23 @@ public class FileController {
                 .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + fileData.getFileName())
                 .contentType(MediaType.parseMediaType(fileData.getFileType()))
                 .body(fileData.getContent());
+    }
+
+    @GetMapping("/download/link/{id}")
+    public ResponseEntity<ApiResponse> downloadLink(@PathVariable Long id){
+        String fileUrl = serverUrl + "/download/" + id;
+        return ResponseEntity.ok(ApiResponse.ok(fileUrl));
+    }
+
+    @GetMapping
+    public ResponseEntity<ApiResponse> getFiles(
+            @RequestParam(required = false) String name,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime dateFrom,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime dateTo,
+            @RequestParam(required = false) List<String> types
+    ) {
+        List<FileDto> list = fileService.getFilteredList(name, dateFrom, dateTo, types);
+        return ResponseEntity.ok(ApiResponse.ok(list));
     }
 
 }
